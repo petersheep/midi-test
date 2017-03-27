@@ -1,0 +1,4 @@
+# Installation
+ $ autoreconf
+ $ ./configure
+ $ make
