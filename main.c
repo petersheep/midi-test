@@ -7,8 +7,8 @@
 static snd_seq_t *seq_handle;
 static int in_port;
 
-int midi_open(char *name) {
-  int ret = snd_seq_open(&seq_handle, name, SND_SEQ_OPEN_INPUT, 0);
+int midi_open() {
+  int ret = snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_INPUT, 0);
   if (ret != 0) {
     return -1;
   }
@@ -56,21 +56,21 @@ void midi_process(snd_seq_event_t *ev) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 4) {
-    fprintf(stderr, "Usage: midi-test <sequencer name> <client> <port>(eg. "
-                    "midi-test hw 20 0)\n");
+  if (argc != 3) {
+    fprintf(stderr, "Usage: midi-test [client ID] [Port ID] (eg. "
+                    "midi-test 20 0)\n");
     exit(1);
   }
 
-  int sender_client = atoi(argv[2]);
-  int sender_port = atoi(argv[3]);
+  int sender_client = atoi(argv[1]);
+  int sender_port = atoi(argv[2]);
   printf("Sender client: %d, port: %d\n", sender_client, sender_port);
 
   // first open the sequencer device for reading.
-  int ret = midi_open(argv[1]);
+  int ret = midi_open();
   if (ret < 0) {
     if (ret == -1) {
-      fprintf(stderr, "Error: cannot open %s\n", argv[1]);
+      fprintf(stderr, "Error: cannot open device\n");
     } else if (ret == -2) {
       fprintf(stderr, "Error: failed to set client name\n");
     } else {
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     exit(2);
   }
 
-  printf("Opened %s:%d\n", argv[1], in_port);
+  printf("Opened port: %d\n", in_port);
 
   ret = capture_keyboard(sender_client, sender_port);
   if (ret < 0) {
